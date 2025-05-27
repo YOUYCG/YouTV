@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  youtv:
+    build: .
+    container_name: youtv
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - PASSWORD=${PASSWORD:-}
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - REQUEST_TIMEOUT=${REQUEST_TIMEOUT:-10000}
+      - MAX_RETRIES=${MAX_RETRIES:-3}
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-100}
+      - DEBUG=${DEBUG:-false}
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - youtv-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  youtv-network:
+    driver: bridge
+
+volumes:
+  logs:
+    driver: local

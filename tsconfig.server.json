@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "target": "ES2022",
+    "module": "ESNext",
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": [
+    "src/server/**/*",
+    "src/types/**/*"
+  ],
+  "exclude": [
+    "src/public/**/*",
+    "node_modules",
+    "**/*.test.ts"
+  ]
+}

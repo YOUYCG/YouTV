@@ -1,0 +1,51 @@
+{
+  "version": 2,
+  "name": "youtv",
+  "builds": [
+    {
+      "src": "src/server/app.ts",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["src/**"]
+      }
+    },
+    {
+      "src": "src/public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/src/server/app.ts"
+    },
+    {
+      "src": "/proxy/(.*)",
+      "dest": "/src/server/app.ts"
+    },
+    {
+      "src": "/s=(.*)",
+      "dest": "/src/server/app.ts"
+    },
+    {
+      "src": "/player.html",
+      "dest": "/src/server/app.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/src/public/$1"
+    },
+    {
+      "src": "/",
+      "dest": "/src/server/app.ts"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "src/server/app.ts": {
+      "maxDuration": 30
+    }
+  }
+}

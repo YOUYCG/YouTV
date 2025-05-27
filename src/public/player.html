@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="YouTV 播放器">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/main.css">
+
+    <!-- HLS.js -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.12/dist/hls.min.js"></script>
+
+    <title>YouTV 播放器</title>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+    <!-- 密码验证模态框 -->
+    <div id="passwordModal" class="modal-overlay hidden">
+        <div class="modal-content w-96 p-6">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold mb-2">访问验证</h2>
+                <p class="text-gray-400">请输入密码继续访问</p>
+            </div>
+            <form id="passwordForm" class="space-y-4">
+                <input
+                    type="password"
+                    id="passwordInput"
+                    class="input-field"
+                    placeholder="请输入密码"
+                    autocomplete="current-password"
+                >
+                <button type="submit" class="btn-primary w-full">
+                    <span id="passwordSubmitText">提交</span>
+                    <div id="passwordSubmitLoading" class="loading-spinner hidden"></div>
+                </button>
+            </form>
+            <div id="passwordError" class="text-red-400 text-sm mt-2 hidden">
+                密码错误，请重试
+            </div>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="min-h-screen flex flex-col">
+        <!-- 头部导航 -->
+        <header class="bg-gradient-to-r from-gray-800 to-gray-900 border-b border-gray-700 p-4 shadow-lg">
+            <div class="container mx-auto flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <img src="/assets/logo.svg" alt="YouTV" class="w-8 h-8 brand-logo">
+                    <h1 class="text-xl font-bold text-gradient">YouTV</h1>
+                    <span class="text-sm text-gray-400">播放器</span>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <button id="fullscreenBtn" class="p-2 text-gray-400 hover:text-white transition-colors" title="全屏播放">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                        </svg>
+                    </button>
+                    <button id="backBtn" class="btn-secondary">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        返回
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 播放器区域 -->
+        <main class="flex-1 flex flex-col lg:flex-row">
+            <!-- 视频播放器 -->
+            <div class="flex-1 bg-black relative">
+                <!-- 加载状态 -->
+                <div id="playerLoading" class="absolute inset-0 flex items-center justify-center bg-black">
+                    <div class="text-center">
+                        <div class="loading-spinner mx-auto mb-4 w-12 h-12"></div>
+                        <p class="text-white text-lg">正在加载视频...</p>
+                    </div>
+                </div>
+
+                <!-- 错误状态 -->
+                <div id="playerError" class="absolute inset-0 flex items-center justify-center bg-black hidden">
+                    <div class="text-center">
+                        <div class="text-red-500 text-6xl mb-4">⚠️</div>
+                        <h3 class="text-white text-xl mb-2">视频加载失败</h3>
+                        <p class="text-gray-400 mb-4">请尝试其他视频源或稍后重试</p>
+                        <button id="retryBtn" class="btn-primary">重试</button>
+                    </div>
+                </div>
+
+                <!-- 视频播放器 -->
+                <video
+                    id="videoPlayer"
+                    class="w-full h-full"
+                    controls
+                    preload="metadata"
+                    crossorigin="anonymous"
+                    style="min-height: 400px;"
+                >
+                    您的浏览器不支持视频播放
+                </video>
+            </div>
+
+            <!-- 侧边栏 -->
+            <div class="w-full lg:w-80 bg-gray-800 border-l border-gray-700">
+                <!-- 视频信息 -->
+                <div class="p-4 border-b border-gray-700">
+                    <h2 id="videoTitle" class="text-lg font-bold mb-2">视频标题</h2>
+                    <div class="flex items-center space-x-4 text-sm text-gray-400">
+                        <span id="currentEpisode">第1集</span>
+                        <span id="videoSource">来源</span>
+                    </div>
+                </div>
+
+                <!-- 播放控制 -->
+                <div class="p-4 border-b border-gray-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <button id="prevEpisode" class="btn-secondary flex-1 mr-2" disabled>
+                            上一集
+                        </button>
+                        <div id="episodeLoading" class="hidden mx-4">
+                            <div class="loading-spinner"></div>
+                        </div>
+                        <button id="nextEpisode" class="btn-secondary flex-1 ml-2" disabled>
+                            下一集
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between text-sm">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" id="autoPlay" class="toggle">
+                            <span>自动连播</span>
+                        </label>
+
+                        <button id="toggleEpisodeOrder" class="text-blue-400 hover:text-blue-300">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                            </svg>
+                            倒序排列
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 剧集列表 -->
+                <div class="flex-1 overflow-y-auto">
+                    <div class="p-4">
+                        <h3 class="font-semibold mb-3">剧集列表</h3>
+                        <div id="episodesList" class="space-y-2">
+                            <div class="text-center text-gray-400 py-8">
+                                <div class="loading-spinner mx-auto mb-4"></div>
+                                <p>加载中...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast通知容器 -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2">
+        <!-- Toast通知将在这里动态生成 -->
+    </div>
+
+    <!-- 脚本 -->
+    <script>
+        // 全局配置
+        window.APP_CONFIG = {
+            PASSWORD_HASH: '{{PASSWORD}}',
+            PROXY_URL: '/proxy/',
+            API_TIMEOUT: 10000
+        };
+
+        // 播放器配置
+        window.PLAYER_CONFIG = {
+            autoplay: false,
+            volume: 0.8,
+            playbackRate: 1.0,
+            adFilteringEnabled: true,
+            adFilteringStorage: 'adFilteringEnabled'
+        };
+    </script>
+    <script type="module" src="/js/player.js"></script>
+</body>
+</html>

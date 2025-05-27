@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="YouTV - 免费在线视频搜索与观看平台，自由观影，畅享精彩">
+    <meta name="keywords" content="在线视频,视频搜索,免费观看,影视,电影,电视剧">
+    <meta name="author" content="YouTV Team">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/main.css">
+
+    <title>YouTV - 免费在线视频搜索与观看平台</title>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+    <!-- 密码验证模态框 -->
+    <div id="passwordModal" class="modal-overlay hidden">
+        <div class="modal-content w-96 p-6">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold mb-2">访问验证</h2>
+                <p class="text-gray-400">请输入密码继续访问</p>
+            </div>
+            <form id="passwordForm" class="space-y-4">
+                <input
+                    type="password"
+                    id="passwordInput"
+                    class="input-field"
+                    placeholder="请输入密码"
+                    autocomplete="current-password"
+                >
+                <button type="submit" class="btn-primary w-full">
+                    <span id="passwordSubmitText">提交</span>
+                    <div id="passwordSubmitLoading" class="loading-spinner hidden"></div>
+                </button>
+            </form>
+            <div id="passwordError" class="text-red-400 text-sm mt-2 hidden">
+                密码错误，请重试
+            </div>
+        </div>
+    </div>
+
+    <!-- 使用声明模态框 -->
+    <div id="disclaimerModal" class="modal-overlay hidden">
+        <div class="modal-content w-full max-w-2xl p-6">
+            <h2 class="text-2xl font-bold mb-4">使用声明</h2>
+            <div class="space-y-4 text-gray-300 max-h-96 overflow-y-auto">
+                <p>欢迎使用 YouTV。在开始使用前，请您了解并同意以下条款：</p>
+
+                <div>
+                    <strong class="text-white">服务性质：</strong>
+                    YouTV 仅提供视频搜索服务，不直接提供、存储或上传任何视频内容。所有搜索结果均来自第三方公开接口。
+                </div>
+
+                <div>
+                    <strong class="text-white">用户责任：</strong>
+                    用户在使用本站服务时，须遵守相关法律法规，不得利用搜索结果从事侵权行为，如下载、传播未经授权的作品等。
+                </div>
+
+                <div>
+                    <strong class="text-white">广告风险提示：</strong>
+                    本站所有视频均来自第三方采集站，视频中出现的广告与本站无关，请勿相信或点击视频中的任何广告内容，谨防上当受骗。
+                </div>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button id="acceptDisclaimer" class="btn-primary">
+                    我已了解并接受
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- 头部 -->
+        <header class="text-center mb-12">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center space-x-4">
+                    <img src="/assets/logo.svg" alt="YouTV" class="w-12 h-12 brand-logo">
+                    <h1 class="text-4xl font-bold text-gradient">YouTV</h1>
+                </div>
+
+                <!-- 工具栏 -->
+                <div class="flex items-center space-x-4">
+                    <button id="historyBtn" class="p-2 text-gray-400 hover:text-white transition-colors" title="搜索历史">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </button>
+                    <button id="settingsBtn" class="p-2 text-gray-400 hover:text-white transition-colors" title="设置">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <p class="text-xl text-gray-400 mb-8">自由观影，畅享精彩</p>
+
+            <!-- 导航 -->
+            <nav class="flex justify-center space-x-6 mb-8">
+                <button id="homeTab" class="tab-button active px-4 py-2 font-medium border-b-2 border-blue-500 text-blue-400">
+                    首页
+                </button>
+                <button id="searchTab" class="tab-button px-4 py-2 font-medium border-b-2 border-transparent text-gray-400 hover:text-white">
+                    搜索
+                </button>
+                <button id="movieTab" class="tab-button px-4 py-2 font-medium border-b-2 border-transparent text-gray-400 hover:text-white">
+                    电影
+                </button>
+                <button id="tvTab" class="tab-button px-4 py-2 font-medium border-b-2 border-transparent text-gray-400 hover:text-white">
+                    电视剧
+                </button>
+                <button id="animeTab" class="tab-button px-4 py-2 font-medium border-b-2 border-transparent text-gray-400 hover:text-white">
+                    动漫
+                </button>
+                <button id="varietyTab" class="tab-button px-4 py-2 font-medium border-b-2 border-transparent text-gray-400 hover:text-white">
+                    综艺
+                </button>
+            </nav>
+        </header>
+
+        <!-- 搜索区域 -->
+        <div id="searchArea" class="flex-1 mb-8">
+            <div class="max-w-2xl mx-auto">
+                <div class="relative">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        class="input-field pr-24 text-lg py-4"
+                        placeholder="搜索电影、电视剧、综艺..."
+                        autocomplete="off"
+                    >
+                    <button
+                        id="clearSearchInput"
+                        class="absolute right-16 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white hidden"
+                        title="清空"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    <button
+                        id="searchBtn"
+                        class="absolute right-2 top-1/2 transform -translate-y-1/2 btn-primary px-4 py-2"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 搜索结果区域 -->
+        <div id="resultsArea" class="hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold">
+                    搜索结果
+                    <span id="searchResultsCount" class="text-blue-400">0</span> 个
+                </h2>
+                <button id="backToHome" class="btn-secondary">
+                    返回首页
+                </button>
+            </div>
+            <div id="results" class="video-grid"></div>
+        </div>
+
+        <!-- 热门内容区域 -->
+        <div id="trendingArea" class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gradient">热门推荐</h2>
+                <div class="flex space-x-3">
+                    <button id="trendingMovieTab" class="btn-primary px-4 py-2 text-sm">电影</button>
+                    <button id="trendingTvTab" class="btn-secondary px-4 py-2 text-sm">电视剧</button>
+                    <button id="refreshTrending" class="btn-secondary px-4 py-2 text-sm">换一批</button>
+                </div>
+            </div>
+            <div id="trendingResults" class="video-grid">
+                <div class="text-center text-gray-400 py-8">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <p>正在加载热门内容...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 豆瓣推荐区域 -->
+        <div id="doubanArea" class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gradient">豆瓣热门</h2>
+                <div class="flex space-x-3">
+                    <button id="doubanMovieTab" class="btn-primary px-4 py-2 text-sm">电影</button>
+                    <button id="doubanTvTab" class="btn-secondary px-4 py-2 text-sm">电视剧</button>
+                    <button id="refreshDouban" class="btn-secondary px-4 py-2 text-sm">换一批</button>
+                </div>
+            </div>
+            <div id="doubanResults" class="video-grid">
+                <div class="text-center text-gray-400 py-8">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <p>正在加载推荐内容...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分类内容区域 -->
+        <div id="categoryArea" class="mb-12 hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h2 id="categoryTitle" class="text-2xl font-bold text-gradient">电影</h2>
+                <div class="flex space-x-3">
+                    <select id="categorySort" class="bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600">
+                        <option value="time">最新</option>
+                        <option value="hits">最热</option>
+                        <option value="score">评分</option>
+                    </select>
+                    <select id="categoryYear" class="bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600">
+                        <option value="">全部年份</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                        <option value="2020">2020</option>
+                    </select>
+                    <select id="categoryGenre" class="bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600">
+                        <option value="">全部类型</option>
+                        <option value="动作">动作</option>
+                        <option value="喜剧">喜剧</option>
+                        <option value="爱情">爱情</option>
+                        <option value="科幻">科幻</option>
+                        <option value="悬疑">悬疑</option>
+                        <option value="恐怖">恐怖</option>
+                        <option value="剧情">剧情</option>
+                    </select>
+                </div>
+            </div>
+            <div id="categoryResults" class="video-grid">
+                <div class="text-center text-gray-400 py-8">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <p>正在加载内容...</p>
+                </div>
+            </div>
+            <!-- 分页 -->
+            <div id="categoryPagination" class="flex justify-center mt-8 space-x-2">
+                <button id="prevPage" class="btn-secondary px-4 py-2" disabled>上一页</button>
+                <span id="pageInfo" class="flex items-center px-4 py-2 text-gray-400">第 1 页</span>
+                <button id="nextPage" class="btn-secondary px-4 py-2">下一页</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 搜索历史侧边栏 -->
+    <div id="historyPanel" class="sidebar">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold">搜索历史</h3>
+                <button id="closeHistoryPanel" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="searchHistoryList" class="space-y-2">
+                <div class="text-center text-gray-400 py-8">
+                    暂无搜索记录
+                </div>
+            </div>
+            <button id="clearSearchHistory" class="btn-danger w-full mt-4">
+                清空历史记录
+            </button>
+        </div>
+    </div>
+
+    <!-- 设置侧边栏 -->
+    <div id="settingsPanel" class="sidebar">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold">设置</h3>
+                <button id="closeSettingsPanel" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 数据源设置 -->
+            <div class="mb-8">
+                <h4 class="text-lg font-semibold mb-4">数据源设置</h4>
+                <div class="flex space-x-2 mb-4">
+                    <button id="selectAllAPIs" class="btn-secondary text-sm">全选</button>
+                    <button id="selectNoneAPIs" class="btn-secondary text-sm">全不选</button>
+                    <button id="selectNormalAPIs" class="btn-secondary text-sm">全选普通资源</button>
+                </div>
+                <p class="text-sm text-gray-400 mb-4">
+                    已选API数量：<span id="selectedApiCount">0</span>
+                </p>
+                <div id="apiCheckboxes" class="space-y-2 max-h-64 overflow-y-auto">
+                    <!-- API复选框将在这里动态生成 -->
+                </div>
+
+                <!-- 自定义API -->
+                <div class="mt-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h5 class="font-medium">自定义API</h5>
+                        <button id="addCustomApiBtn" class="text-blue-400 hover:text-blue-300 text-sm">
+                            + 添加
+                        </button>
+                    </div>
+                    <div id="customApisList" class="space-y-2">
+                        <!-- 自定义API列表将在这里动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 功能开关 -->
+            <div class="mb-8">
+                <h4 class="text-lg font-semibold mb-4">功能开关</h4>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label class="font-medium">黄色内容过滤</label>
+                            <p class="text-sm text-gray-400">过滤"伦理片"等黄色内容</p>
+                        </div>
+                        <input type="checkbox" id="yellowFilterToggle" class="toggle">
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label class="font-medium">分片广告过滤</label>
+                            <p class="text-sm text-gray-400">关闭可减少旧版浏览器卡顿</p>
+                        </div>
+                        <input type="checkbox" id="adFilterToggle" class="toggle">
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label class="font-medium">豆瓣热门推荐</label>
+                            <p class="text-sm text-gray-400">首页显示豆瓣热门影视内容</p>
+                        </div>
+                        <input type="checkbox" id="doubanToggle" class="toggle">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 一般功能 -->
+            <div>
+                <h4 class="text-lg font-semibold mb-4">一般功能</h4>
+                <div class="space-y-2">
+                    <button id="importConfig" class="btn-secondary w-full">导入配置</button>
+                    <button id="exportConfig" class="btn-secondary w-full">导出配置</button>
+                    <button id="clearCookies" class="btn-danger w-full">清除Cookie</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 视频详情模态框 -->
+    <div id="videoModal" class="modal-overlay hidden">
+        <div class="modal-content w-full max-w-4xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 id="videoModalTitle" class="text-2xl font-bold"></h2>
+                <button id="closeVideoModal" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="videoModalContent">
+                <!-- 视频详情内容将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载指示器 -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 hidden">
+        <div class="bg-gray-800 rounded-lg p-6 flex items-center space-x-4">
+            <div class="loading-spinner"></div>
+            <span id="loadingText">加载中...</span>
+        </div>
+    </div>
+
+    <!-- Toast通知容器 -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2">
+        <!-- Toast通知将在这里动态生成 -->
+    </div>
+
+    <!-- 脚本 -->
+    <script>
+        // 全局配置
+        window.APP_CONFIG = {
+            PASSWORD_HASH: '409e7eb8f9874e74bc23e725125cbb3626fa3e5f40adb4f8c8e1c9ef834c166b',
+            PROXY_URL: '/proxy/',
+            API_TIMEOUT: 10000
+        };
+    </script>
+    <script type="module" src="/js/app.js"></script>
+</body>
+</html>
