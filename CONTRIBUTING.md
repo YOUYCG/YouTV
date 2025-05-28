@@ -8,7 +8,7 @@
 
 如果您发现了 bug 或有功能建议，请：
 
-1. 检查 [Issues](https://github.com/your-username/YouTV/issues) 确保问题尚未被报告
+1. 检查 [Issues](https://github.com/YOUYCG/YouTV/issues) 确保问题尚未被报告
 2. 使用相应的 Issue 模板创建新的 Issue
 3. 提供详细的描述和重现步骤
 4. 如果可能，请提供截图或错误日志
@@ -263,9 +263,9 @@ Closes #123
 
 如果您有任何问题或需要帮助：
 
-- 创建 [Issue](https://github.com/your-username/YouTV/issues)
-- 参与 [Discussions](https://github.com/your-username/YouTV/discussions)
-- 发送邮件至 [your-email@example.com](mailto:your-email@example.com)
+- 创建 [Issue](https://github.com/YOUYCG/YouTV/issues)
+- 参与 [Discussions](https://github.com/YOUYCG/YouTV/discussions)
+- 发送邮件至 [youycg@outlook.com](mailto:youycg@outlook.com)
 
 ## 🙏 致谢
 
